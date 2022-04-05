@@ -1,6 +1,7 @@
+import json
 import matplotlib.pyplot as plt
 import pandas as pd
-import flightTourismDataLoader as ftd
+import requests
 
 
 def ryanNumOfFlightsVis(df):
@@ -49,10 +50,17 @@ def load_cached_data():
     return pd.read_csv('cachedFlightData.csv')
 
 
-def load_live_data():
-    return ftd.save_flight_data(flight_api_key)
+def load_live_data(api_key):
+    main_url = "https://airlabs.co/api/v9/flights?api_key="+api_key
+    print(main_url)
+    request_data=requests.get(main_url).json()["response"]
+    req_data=json.dumps(request_data)
+    dataFile=pd.read_json(req_data)
+    dataFile.to_csv('cachedFlightData.csv',encoding='utf-8',index=False)
+    return dataFile
 
 def dataChoice():
+    flight_api_key = "018ec34c-8a03-4cd6-aa66-026d1a0385cf"
     choice = int(input("Please choose 1 of the following:\n"
                        "1. Cached Flight Data\n"
                        "2. Live Flight Data\n"
@@ -62,8 +70,8 @@ def dataChoice():
             ryanNumOfFlightsVis(load_cached_data())
             ryanScatterMapEU(load_cached_data())
         elif choice ==2:
-            ryanNumOfFlightsVis(load_live_data())
-            ryanScatterMapEU(load_live_data())
+            ryanNumOfFlightsVis(load_live_data(flight_api_key))
+            ryanScatterMapEU(load_live_data(flight_api_key))
         else:
             print("Invalid choice, please try again\n")
             dataChoice()
@@ -74,6 +82,4 @@ def dataChoice():
 
 
 if __name__ == "__main__":
-    flight_api_key = "018ec34c-8a03-4cd6-aa66-026d1a0385cf"
     dataChoice()
-
